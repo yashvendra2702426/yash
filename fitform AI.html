@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FitForm AI – Squat and Push-up Coach</title>
+<meta name="description" content="FitForm turns any webcam or phone camera into an AI strength coach. Real-time rep counting and form checking for squats and push-ups, right in your browser.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --ink:#0E1B2C;
+  --ink-2:#1B2B42;
+  --chalk:#E9EDF1;
+  --paper:#F7F9FB;
+  --cobalt:#2640F5;
+  --good:#12A56B;
+  --warn:#F5A524;
+  --bad:#E5383B;
+  --muted:#5B6878;
+  --line:#CDD5DE;
+  --head:"Bricolage Grotesque","Segoe UI",Arial,sans-serif;
+  --body:"Figtree","Segoe UI",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+body{margin:0;font-family:var(--body);font-size:17px;line-height:1.6;color:var(--ink);background:var(--chalk)}
+h1,h2,h3{font-family:var(--head);line-height:1.08;margin:0;letter-spacing:-.02em}
+h1{font-size:clamp(2.6rem,6.2vw,4.9rem);font-weight:800}
+h2{font-size:clamp(1.9rem,3.8vw,2.9rem);font-weight:700}
+h3{font-size:1.25rem;font-weight:700;letter-spacing:-.01em}
+p{margin:0 0 1em;max-width:62ch}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--cobalt);outline-offset:3px;border-radius:4px}
+.wrap{width:min(1160px,92vw);margin:0 auto}
+section{padding:96px 0}
+
+/* nav */
+header.nav{position:sticky;top:0;z-index:50;background:rgba(233,237,241,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;height:64px;gap:16px}
+.logo{font-family:var(--head);font-weight:800;font-size:1.4rem;text-decoration:none;letter-spacing:-.03em}
+.logo b{color:var(--cobalt)}
+.nav ul{display:flex;gap:26px;list-style:none;margin:0;padding:0;font-weight:600;font-size:.95rem}
+.nav ul a{text-decoration:none;color:var(--muted)}
+.nav ul a:hover{color:var(--ink)}
+@media (max-width:820px){.nav ul{display:none}}
+.btn{display:inline-block;border:0;cursor:pointer;font:600 1rem var(--body);padding:13px 24px;border-radius:999px;background:var(--cobalt);color:#fff;text-decoration:none;transition:transform .15s,background .15s}
+.btn:hover{background:#1a2fd0;transform:translateY(-1px)}
+.btn.ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 2px var(--ink)}
+.btn.ghost:hover{background:var(--ink);color:#fff}
+.btn.dark{background:var(--ink)}
+.btn.dark:hover{background:var(--ink-2)}
+.btn[disabled]{opacity:.45;cursor:not-allowed;transform:none}
+
+/* hero */
+.hero{padding:72px 0 88px}
+.hero .wrap{display:grid;grid-template-columns:1.15fr .85fr;gap:56px;align-items:center}
+.hero p.lead{font-size:1.25rem;color:var(--ink-2);margin:26px 0 32px}
+.hero .cta{display:flex;gap:14px;flex-wrap:wrap}
+.hero-meta{margin-top:34px;font-size:.95rem;color:var(--muted)}
+.figure{background:var(--ink);border-radius:28px;padding:28px;color:#fff}
+.figure svg{width:100%;height:auto;display:block}
+.figure .cap{display:flex;justify-content:space-between;font-size:.95rem;color:#B8C4D3;margin-top:8px}
+.draw{stroke-dasharray:90;stroke-dashoffset:90;animation:draw 1.6s .4s ease forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+@media (max-width:900px){.hero .wrap{grid-template-columns:1fr}}
+
+/* problem / solution */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:72px}
+.split h2{margin-bottom:26px}
+.split ul{list-style:none;padding:0;margin:0}
+.split li{padding:16px 0 16px 34px;border-top:1px solid var(--line);position:relative}
+.split li:last-child{border-bottom:1px solid var(--line)}
+.split li::before{content:"";position:absolute;left:0;top:25px;width:14px;height:14px;border-radius:50%}
+.prob li::before{background:var(--bad)}
+.sol li::before{background:var(--good)}
+@media (max-width:820px){.split{grid-template-columns:1fr;gap:48px}}
+
+/* flow */
+.band{background:var(--ink);color:#fff}
+.band h2{margin-bottom:12px}
+.band .sub{color:#B8C4D3}
+.flow{list-style:none;counter-reset:s;padding:0;margin:44px 0 0;display:grid;grid-template-columns:repeat(7,1fr);gap:14px}
+.flow li{counter-increment:s;border-top:3px solid var(--cobalt);padding-top:14px;font-weight:600;font-size:1rem;line-height:1.3}
+.flow li::before{content:counter(s);display:block;font-family:var(--head);font-size:1.9rem;color:#8EA0FF;margin-bottom:6px}
+.stages{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;margin-top:56px}
+.stages div{border-left:3px solid #33465F;padding-left:16px;color:#D6DEE8;font-size:.98rem}
+.stages strong{display:block;color:#fff;margin-bottom:4px}
+@media (max-width:980px){.flow{grid-template-columns:repeat(2,1fr)}.stages{grid-template-columns:1fr 1fr}}
+@media (max-width:560px){.stages{grid-template-columns:1fr}}
+
+/* tracker */
+#tracker{background:var(--paper)}
+.tracker-head{display:flex;justify-content:space-between;align-items:end;gap:24px;flex-wrap:wrap;margin-bottom:32px}
+.controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.seg{display:inline-flex;background:var(--chalk);border-radius:999px;padding:4px}
+.seg button{border:0;background:transparent;font:600 .95rem var(--body);padding:9px 18px;border-radius:999px;cursor:pointer;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.toggle{display:flex;align-items:center;gap:8px;font-weight:600;font-size:.95rem;cursor:pointer}
+.toggle input{width:18px;height:18px;accent-color:var(--cobalt)}
+.stage{display:grid;grid-template-columns:1.6fr 1fr;gap:24px}
+.screen{position:relative;background:var(--ink);border-radius:22px;overflow:hidden;aspect-ratio:16/9;min-height:260px}
+.screen canvas{width:100%;height:100%;display:block;object-fit:contain;background:var(--ink)}
+.screen video{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;padding:24px;gap:10px}
+.overlay h3{font-size:1.5rem}
+.overlay p{color:#B8C4D3;margin:0;max-width:40ch}
+.overlay.hidden{display:none}
+.fb{position:absolute;left:16px;right:16px;bottom:16px;padding:12px 16px;border-radius:14px;font-weight:700;background:rgba(14,27,44,.82);color:#fff;display:none;backdrop-filter:blur(4px)}
+.fb.show{display:block}
+.fb.good{border-left:6px solid var(--good)}
+.fb.warn{border-left:6px solid var(--warn)}
+.fb.bad{border-left:6px solid var(--bad)}
+.hud{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-content:start}
+.stat{background:var(--chalk);border-radius:16px;padding:14px 16px}
+.stat small{display:block;color:var(--muted);font-weight:600;font-size:.82rem}
+.stat output{font-family:var(--head);font-weight:800;font-size:2rem;line-height:1.1;display:block}
+.stat.big{grid-column:span 2;background:var(--ink);color:#fff}
+.stat.big small{color:#B8C4D3}
+.stat.big output{font-size:4rem}
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px;grid-column:span 2}
+.status{margin-top:16px;color:var(--muted);font-size:.95rem;min-height:1.6em}
+.tips{margin-top:28px;display:grid;grid-template-columns:repeat(3,1fr);gap:24px;font-size:.95rem;color:var(--ink-2)}
+.tips strong{display:block}
+@media (max-width:900px){.stage{grid-template-columns:1fr}.tips{grid-template-columns:1fr}}
+
+/* progress */
+.progress-grid{display:grid;grid-template-columns:1fr 1.4fr;gap:48px;margin-top:36px;align-items:start}
+.totals{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.totals .stat{background:var(--paper)}
+table{width:100%;border-collapse:collapse;font-size:.98rem}
+th,td{text-align:left;padding:13px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:700;color:var(--muted);font-size:.88rem}
+.empty{color:var(--muted);padding:20px 0}
+@media (max-width:820px){.progress-grid{grid-template-columns:1fr}}
+.tablewrap{overflow-x:auto}
+
+/* impact */
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:72px;margin-top:36px}
+.cols h3{margin-bottom:14px}
+.cols ul{margin:0;padding-left:20px}
+.cols li{margin-bottom:12px;max-width:56ch}
+.impact{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:64px;border-top:2px solid var(--ink)}
+.impact div{padding:24px 28px 0 0}
+.impact div+div{padding-left:28px;border-left:1px solid var(--line)}
+.impact h3{margin-bottom:8px}
+@media (max-width:820px){.cols{grid-template-columns:1fr;gap:40px}.impact{grid-template-columns:1fr}.impact div+div{border-left:0;padding-left:0}}
+
+/* feasibility */
+.feas{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin:36px 0 56px}
+.feas h3{margin-bottom:8px}
+.feas p{margin:0 0 10px}
+.tick{color:var(--good);font-weight:700}
+.badge{display:inline-block;font-weight:700;font-size:.82rem;padding:3px 12px;border-radius:999px;background:var(--chalk)}
+.badge.excellent{background:#CFF1E1;color:#0B6B45}
+.badge.good{background:#DDF4E7;color:#12704A}
+.badge.low{background:#E0E7FF;color:#1B2FB0}
+.badge.medium{background:#FDEBC8;color:#8A5A00}
+@media (max-width:820px){.feas{grid-template-columns:1fr}}
+
+/* stack & research */
+.stack{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin:36px 0 64px}
+.stack h3{margin-bottom:10px}
+.stack ul{list-style:none;margin:0;padding:0}
+.stack li{padding:8px 0;border-bottom:1px solid var(--line)}
+.research ol{padding-left:22px;max-width:70ch}
+.research li{margin-bottom:16px}
+@media (max-width:820px){.stack{grid-template-columns:1fr}}
+
+/* team */
+.team{background:var(--ink);color:#fff}
+.members{display:flex;flex-wrap:wrap;gap:12px;margin:32px 0}
+.members span{background:var(--ink-2);padding:10px 20px;border-radius:999px;font-weight:600}
+.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:36px;color:#B8C4D3}
+.facts strong{display:block;color:#fff}
+@media (max-width:820px){.facts{grid-template-columns:1fr 1fr}}
+footer{padding:28px 0;color:var(--muted);font-size:.9rem;text-align:center}
+
+/* dialog */
+dialog{border:0;border-radius:24px;padding:36px;max-width:min(520px,92vw);width:100%;background:var(--paper);color:var(--ink)}
+dialog::backdrop{background:rgba(14,27,44,.6)}
+dialog h2{margin-bottom:6px}
+dialog .totals{margin:22px 0}
+dialog p{color:var(--muted)}
+
+.ex-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;margin-top:40px}
+.ex-grid article{border-top:3px solid var(--ink);padding-top:20px}
+.ex-grid h3{font-size:1.8rem;margin-bottom:14px}
+.ex-grid ul{margin:0;padding-left:20px}
+.ex-grid li{margin-bottom:10px;max-width:52ch}
+.feat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;margin-top:64px}
+.feat-row h3{font-size:1.1rem;margin-bottom:8px}
+.feat-row p{font-size:.97rem;color:var(--ink-2);margin:0}
+@media (max-width:900px){.ex-grid{grid-template-columns:1fr;gap:40px}.feat-row{grid-template-columns:1fr 1fr}}
+@media (max-width:560px){.feat-row{grid-template-columns:1fr}}
+</style>
+</head>
+
+<body>
+<header class="nav">
+  <div class="wrap">
+    <a class="logo" href="#top">Fit<b>Form</b> AI</a>
+    <ul>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#tracker">Live tracker</a></li>
+      <li><a href="#progress">Progress</a></li>
+    </ul>
+    <a class="btn" href="#tracker">Try it now</a>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <h1>Your camera is your spotter.</h1>
+      <p class="lead">FitForm counts your reps, checks your form and talks you through every set. It runs in your browser: no wearables, no trainer fees, no video uploads.</p>
+      <div class="cta">
+        <a class="btn" href="#tracker">Start a workout</a>
+        <a class="btn ghost" href="#features">See features</a>
+      </div>
+      <p class="hero-meta">Squats and push-ups. Works on a laptop webcam or a phone camera.</p>
+    </div>
+    <div class="figure" aria-hidden="true">
+      <svg viewBox="0 0 300 340" role="img">
+        <line x1="20" y1="322" x2="280" y2="322" stroke="#33465F" stroke-width="3"/>
+        <circle cx="152" cy="82" r="16" fill="none" stroke="#fff" stroke-width="5"/>
+        <polyline points="140,120 100,215 190,215 190,322" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+        <line x1="140" y1="120" x2="215" y2="150" stroke="#fff" stroke-width="7" stroke-linecap="round"/>
+        <g fill="#12A56B"><circle cx="140" cy="120" r="7"/><circle cx="100" cy="215" r="7"/><circle cx="190" cy="215" r="9"/><circle cx="190" cy="322" r="7"/></g>
+        <path class="draw" d="M160 215 A30 30 0 0 0 190 245" fill="none" stroke="#8EA0FF" stroke-width="5" stroke-linecap="round"/>
+        <text x="204" y="252" fill="#fff" font-family="Figtree,Arial" font-weight="700" font-size="20">90°</text>
+      </svg>
+      <div class="cap"><span>Knee angle tracked live</span><span>Depth reached</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="wrap">
+    <h2>Two exercises. Done properly.</h2>
+    <p style="margin-top:12px">FitForm watches your joints through the camera and tells you what to fix while you are still moving.</p>
+    <div class="ex-grid">
+      <article>
+        <h3>Squat</h3>
+        <ul>
+          <li>Tracks your knee angle on every frame.</li>
+          <li>Counts a rep only when you reach 90° depth and stand back up fully.</li>
+          <li>Says "Squat lower" when a rep is too shallow, and does not count it.</li>
+          <li>Warns you if you go too deep (under 55°) to protect your knees.</li>
+          <li>Reminds you to keep your chest up if you lean too far forward.</li>
+        </ul>
+      </article>
+      <article>
+        <h3>Push-up</h3>
+        <ul>
+          <li>Tracks your elbow angle on every frame.</li>
+          <li>Counts a rep only when your elbows reach 90° and fully lock out on the way up.</li>
+          <li>Says "Lower your chest" when a rep is too shallow, and does not count it.</li>
+          <li>Warns you when your hips sag or lift out of line with your shoulders.</li>
+        </ul>
+      </article>
+    </div>
+    <div class="feat-row">
+      <div><h3>Automatic rep and set counting</h3><p>No manual logging. Reps are grouped into sets, and a set closes on its own after you rest.</p></div>
+      <div><h3>Live voice and visual cues</h3><p>Spoken tips and a color-coded skeleton: green is good form, amber is not deep enough, red needs fixing.</p></div>
+      <div><h3>Cadence and form score</h3><p>See your reps per minute and the share of reps done with clean form.</p></div>
+      <div><h3>Private by design</h3><p>Video is processed in your browser and discarded. Nothing is uploaded or recorded.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- LIVE TRACKER -->
+<section id="tracker">
+  <div class="wrap">
+    <div class="tracker-head">
+      <div>
+        <h2>Live tracker</h2>
+        <p style="margin:12px 0 0">Pick an exercise, start your camera and move. Reps are counted only after valid depth and full lockout.</p>
+      </div>
+      <div class="controls">
+        <div class="seg" role="group" aria-label="Exercise">
+          <button type="button" data-ex="squat" aria-pressed="true">Squat</button>
+          <button type="button" data-ex="pushup" aria-pressed="false">Push-up</button>
+        </div>
+        <label class="toggle"><input type="checkbox" id="voice" checked> Voice cues</label>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="screen">
+        <video id="video" playsinline muted></video>
+        <canvas id="canvas" width="960" height="540"></canvas>
+        <div class="overlay" id="overlay">
+          <h3>Camera is off</h3>
+          <p id="exHint">Stand side-on to the camera, about 2 m away, with your full body in frame.</p>
+          <button class="btn" id="startBtn" type="button">Start camera</button>
+        </div>
+        <div class="fb" id="fb" role="status" aria-live="polite"></div>
+      </div>
+
+      <div class="hud">
+        <div class="stat big"><small>Reps</small><output id="reps">0</output></div>
+        <div class="stat"><small>Stage</small><output id="stageOut">–</output></div>
+        <div class="stat"><small id="angleLabel">Knee angle</small><output id="angle">–</output></div>
+        <div class="stat"><small>Set</small><output id="setOut">1</output></div>
+        <div class="stat"><small>Cadence (reps/min)</small><output id="cadence">–</output></div>
+        <div class="stat"><small>Form score</small><output id="score">–</output></div>
+        <div class="stat"><small>Latency</small><output id="latency">–</output></div>
+        <div class="actions">
+          <button class="btn ghost" id="setBtn" type="button" disabled>Finish set</button>
+          <button class="btn dark" id="endBtn" type="button" disabled>End workout</button>
+        </div>
+      </div>
+    </div>
+    <p class="status" id="status" role="status" aria-live="polite"></p>
+
+    <div class="tips">
+      <div><strong>Camera angle</strong>Place the camera at hip height. Side-on works best for both exercises.</div>
+      <div><strong>Lighting</strong>Face a light source and avoid strong light behind you.</div>
+      <div><strong>Privacy</strong>Video frames are processed in memory and discarded. Nothing is uploaded or recorded.</div>
+    </div>
+  </div>
+</section>
+
+<!-- PROGRESS -->
+<section id="progress" style="background:var(--chalk)">
+  <div class="wrap">
+    <h2>Your progress</h2>
+    <p style="margin-top:12px">Finished workouts are saved on this device only, so streaks and totals stay private.</p>
+    <div class="progress-grid">
+      <div class="totals">
+        <div class="stat"><small>Day streak</small><output id="streak">0</output></div>
+        <div class="stat"><small>Workouts</small><output id="totalWorkouts">0</output></div>
+        <div class="stat"><small>Total reps</small><output id="totalReps">0</output></div>
+        <div class="stat"><small>Best accuracy</small><output id="bestAcc">–</output></div>
+      </div>
+      <div class="tablewrap" id="history"></div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>FitForm AI</footer>
+
+<dialog id="summary">
+  <h2>Workout complete</h2>
+  <p id="sumEx"></p>
+  <div class="totals">
+    <div class="stat"><small>Total reps</small><output id="sumReps">0</output></div>
+    <div class="stat"><small>Accuracy rate</small><output id="sumAcc">–</output></div>
+    <div class="stat"><small>Time active</small><output id="sumTime">0:00</output></div>
+    <div class="stat"><small>Calories (estimate)</small><output id="sumKcal">0</output></div>
+  </div>
+  <p>Saved to this device.</p>
+  <button class="btn" id="closeSummary" type="button">Done</button>
+</dialog>
+
+<!-- MediaPipe Pose (pinned version) -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5.1675469404/pose.js" crossorigin="anonymous"></script>
+
+<script>
+(() => {
+  'use strict';
+
+  const MP_URL = 'https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5.1675469404/';
+  const $ = id => document.getElementById(id);
+
+  const video = $('video'), canvas = $('canvas'), ctx = canvas.getContext('2d');
+  const el = {
+    overlay: $('overlay'), fb: $('fb'), status: $('status'), startBtn: $('startBtn'),
+    setBtn: $('setBtn'), endBtn: $('endBtn'), voice: $('voice'),
+    reps: $('reps'), stage: $('stageOut'), angle: $('angle'), angleLabel: $('angleLabel'),
+    set: $('setOut'), cadence: $('cadence'), score: $('score'), latency: $('latency'),
+    exHint: $('exHint')
+  };
+
+  /* ---------- Exercise definitions ---------- */
+  // start: angle below which a rep begins | depth: valid-depth target | lock: angle that counts as full lockout
+  const EXERCISES = {
+    squat: {
+      name: 'Squat', angleName: 'Knee angle', joints: ['hip', 'knee', 'ankle'],
+      start: 150, depth: 90, lock: 160, kcal: 0.32,
+      hint: 'Stand side-on to the camera, about 2 m away, with your full body in frame.',
+      ready: 'Ready. Squat down.', deeper: 'Squat lower', depthMsg: 'Good depth, push up',
+      calc: P => angleOf(P.hip, P.knee, P.ankle),
+      check: (P, a) => {
+        if (a < 55) return 'Too deep, protect your knees';
+        if (P.shoulder.v > 0.4 && a < 140) {
+          const lean = Math.atan2(Math.abs(P.shoulder.x - P.hip.x), P.hip.y - P.shoulder.y) * 180 / Math.PI;
+          if (lean > 60) return 'Chest up, keep your back straight';
+        }
+        return null;
+      }
+    },
+    pushup: {
+      name: 'Push-up', angleName: 'Elbow angle', joints: ['shoulder', 'elbow', 'wrist'],
+      start: 140, depth: 90, lock: 155, kcal: 0.29,
+      hint: 'Get into plank side-on to the camera so your whole body is visible.',
+      ready: 'Ready. Lower your chest.', deeper: 'Lower your chest', depthMsg: 'Good depth, push up',
+      calc: P => angleOf(P.shoulder, P.elbow, P.wrist),
+      check: (P) => {
+        if (P.hip.v > 0.4 && P.ankle.v > 0.4 && angleOf(P.shoulder, P.hip, P.ankle) < 150) return 'Keep your hips in line';
+        return null;
+      }
+    }
+  };
+
+  const SIDES = {
+    L: { shoulder: 11, elbow: 13, wrist: 15, hip: 23, knee: 25, ankle: 27 },
+    R: { shoulder: 12, elbow: 14, wrist: 16, hip: 24, knee: 26, ankle: 28 }
+  };
+  const CONNECTIONS = [[11,12],[11,13],[13,15],[12,14],[14,16],[11,23],[12,24],[23,24],[23,25],[25,27],[24,26],[26,28],[27,29],[29,31],[28,30],[30,32]];
+  const COLORS = { good: '#12A56B', warn: '#F5A524', bad: '#E5383B' };
+
+  /* ---------- State ---------- */
+  let exKey = 'squat';
+  let pose = null, stream = null, running = false, busy = false, rafId = 0, tickId = 0;
+  let W = 960, H = 540;
+
+  let state = 'UP', depthHit = false, repIssue = null, repStart = 0, smooth = null;
+  let sets = [], cur = { reps: 0, clean: 0 };
+  let totalReps = 0, cleanReps = 0, partials = 0;
+  let repTimes = [], lastRepAt = 0, activeMs = 0;
+  let latencyAvg = 0;
+  let audioCtx = null, lastSpoken = '', lastSpokenAt = 0, fbTimer = 0;
+
+  /* ---------- Helpers ---------- */
+  function angleOf(a, b, c) {
+    const r = Math.atan2(c.y - b.y, c.x - b.x) - Math.atan2(a.y - b.y, a.x - b.x);
+    let d = Math.abs(r * 180 / Math.PI);
+    return d > 180 ? 360 - d : d;
+  }
+  const fmtTime = ms => { const s = Math.floor(ms / 1000); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+  const setStatus = t => { el.status.textContent = t || ''; };
+
+  function beep(freq) {
+    try {
+      if (!audioCtx) return;
+      const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+      o.frequency.value = freq || 880; g.gain.value = 0.06;
+      o.connect(g); g.connect(audioCtx.destination);
+      o.start(); o.stop(audioCtx.currentTime + 0.12);
+    } catch (e) {}
+  }
+  function speak(text) {
+    if (!el.voice.checked || !('speechSynthesis' in window)) return;
+    const now = performance.now();
+    if (now - lastSpokenAt < 1800 || (text === lastSpoken && now - lastSpokenAt < 6000)) return;
+    lastSpoken = text; lastSpokenAt = now;
+    try {
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text); u.rate = 1.05;
+      window.speechSynthesis.speak(u);
+    } catch (e) {}
+  }
+  function feedback(text, kind, say) {
+    el.fb.textContent = text;
+    el.fb.className = 'fb show ' + kind;
+    clearTimeout(fbTimer);
+    fbTimer = setTimeout(() => el.fb.classList.remove('show'), 2600);
+    if (say) speak(text);
+  }
+
+  function renderHud() {
+    el.reps.textContent = totalReps;
+    el.set.textContent = sets.length + 1;
+    el.stage.textContent = running ? state : '–';
+    const judged = cleanReps + 0;
+    const attempts = totalReps + partials;
+    el.score.textContent = attempts ? Math.round(cleanReps / attempts * 100) + '%' : '–';
+    // cadence = reps per minute from the last few rep intervals
+    const t = repTimes.slice(-5);
+    if (t.length >= 2) {
+      const avg = (t[t.length - 1] - t[0]) / (t.length - 1) / 1000;
+      el.cadence.textContent = avg > 0 ? Math.round(60 / avg) : '–';
+    } else el.cadence.textContent = '–';
+    el.latency.textContent = latencyAvg ? Math.round(latencyAvg) + ' ms' : '–';
+  }
+
+  /* ---------- Exercise selection ---------- */
+  function resetRepState() { state = 'UP'; depthHit = false; repIssue = null; smooth = null; }
+  function applyExercise() {
+    const ex = EXERCISES[exKey];
+    el.angleLabel.textContent = ex.angleName;
+    el.exHint.textContent = ex.hint;
+    el.angle.textContent = '–';
+  }
+  document.querySelectorAll('.seg button').forEach(b => {
+    b.addEventListener('click', () => {
+      if (b.dataset.ex === exKey) return;
+      if (running) finishSet(); // a set belongs to a single exercise
+      exKey = b.dataset.ex;
+      document.querySelectorAll('.seg button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+      resetRepState(); applyExercise(); renderHud();
+    });
+  });
+
+  /* ---------- Sets ---------- */
+  function finishSet() {
+    if (cur.reps > 0) { sets.push(cur); cur = { reps: 0, clean: 0 }; speak('Set complete. Rest.'); }
+    renderHud();
+  }
+  el.setBtn.addEventListener('click', () => { finishSet(); feedback('Set saved. Rest, then go again.', 'good', false); });
+
+  /* ---------- Pose results ---------- */
+  function onResults(results) {
+    if (!running) return;
+    if (canvas.width !== (video.videoWidth || W)) { W = canvas.width = video.videoWidth || W; H = canvas.height = video.videoHeight || H; }
+    const ex = EXERCISES[exKey];
+
+    ctx.save();
+    ctx.translate(W, 0); ctx.scale(-1, 1);           // mirror like a real mirror
+    ctx.drawImage(results.image, 0, 0, W, H);
+
+    const lm = results.poseLandmarks;
+    if (!lm) { ctx.restore(); feedback('No body found. Step back so your full body is in frame.', 'warn', false); return; }
+
+    // choose the body side the camera sees best
+    const vis = side => ex.joints.reduce((s, j) => s + (lm[SIDES[side][j]].visibility || 0), 0);
+    const side = vis('L') >= vis('R') ? 'L' : 'R';
+    const P = {};
+    for (const k in SIDES[side]) {
+      const p = lm[SIDES[side][k]];
+      P[k] = { x: p.x * W, y: p.y * H, v: p.visibility == null ? 1 : p.visibility };
+    }
+    const tracked = ex.joints.map(j => P[j]);
+    const ok = tracked.every(p => p.v > 0.5);
+
+    let liveColor = COLORS.good, liveIssue = null, a = null;
+
+    if (!ok) {
+      liveColor = COLORS.warn;
+      feedback('Move so your whole body is visible', 'warn', false);
+    } else {
+      const raw = ex.calc(P);
+      smooth = smooth == null ? raw : smooth * 0.5 + raw * 0.5;   // temporal smoothing
+      a = smooth;
+      el.angle.textContent = Math.round(a) + '°';
+      const now = performance.now();
+
+      // two-stage hysteresis: start threshold -> valid depth -> lockout
+      if (state === 'UP' && a <= ex.start) {
+        state = 'DOWN'; depthHit = false; repIssue = null; repStart = now;
+      }
+      if (state === 'DOWN') {
+        if (a <= ex.depth && !depthHit) { depthHit = true; feedback(ex.depthMsg, 'good', true); }
+        liveIssue = ex.check(P, a);
+        if (liveIssue) { repIssue = liveIssue; feedback(liveIssue, 'bad', true); }
+        if (a >= ex.lock) {
+          if (depthHit) {
+            totalReps++; cur.reps++; lastRepAt = now; repTimes.push(now);
+            if (!repIssue) { cleanReps++; cur.clean++; }
+            beep(repIssue ? 440 : 880);
+            speak(String(totalReps));
+            feedback(repIssue ? 'Rep ' + totalReps + ' counted. Fix: ' + repIssue : 'Rep ' + totalReps + '. Clean!', repIssue ? 'warn' : 'good', false);
+          } else {
+            partials++;
+            feedback(ex.deeper + ' (rep not counted)', 'warn', true);
+          }
+          state = 'UP'; depthHit = false; repIssue = null;
+        }
+      } else if (!el.fb.classList.contains('show')) {
+        feedback(ex.ready, 'good', false);
+      }
+      liveColor = liveIssue ? COLORS.bad : (state === 'DOWN' && !depthHit ? COLORS.warn : COLORS.good);
+    }
+
+    // skeleton: whole body in white, tracked limb as a form heatmap
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 3;
+    CONNECTIONS.forEach(([i, j]) => {
+      const p = lm[i], q = lm[j];
+      if ((p.visibility || 0) < 0.4 || (q.visibility || 0) < 0.4) return;
+      ctx.beginPath(); ctx.moveTo(p.x * W, p.y * H); ctx.lineTo(q.x * W, q.y * H); ctx.stroke();
+    });
+    ctx.strokeStyle = liveColor; ctx.lineWidth = 8;
+    ctx.beginPath(); ctx.moveTo(tracked[0].x, tracked[0].y); ctx.lineTo(tracked[1].x, tracked[1].y); ctx.lineTo(tracked[2].x, tracked[2].y); ctx.stroke();
+    ctx.fillStyle = '#fff';
+    tracked.forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, 7, 0, 6.2832); ctx.fill(); });
+    ctx.restore();
+
+    // angle label (drawn un-mirrored so the text reads correctly)
+    if (a != null) {
+      ctx.font = '700 22px Figtree, Arial, sans-serif';
+      ctx.fillStyle = '#fff'; ctx.strokeStyle = 'rgba(14,27,44,.85)'; ctx.lineWidth = 4;
+      const lx = W - tracked[1].x + 14, ly = tracked[1].y - 12, txt = Math.round(a) + '°';
+      ctx.strokeText(txt, lx, ly); ctx.fillText(txt, lx, ly);
+    }
+    renderHud();
+  }
+
+  /* ---------- Main loop (adaptive frame dropping: skip frames while the model is busy) ---------- */
+  async function loop() {
+    if (!running) return;
+    if (!busy && video.readyState >= 2) {
+      busy = true;
+      const t0 = performance.now();
+      try { await pose.send({ image: video }); } catch (e) { console.error(e); }
+      const dt = performance.now() - t0;
+      latencyAvg = latencyAvg ? latencyAvg * 0.9 + dt * 0.1 : dt;
+      busy = false;
+    }
+    rafId = requestAnimationFrame(loop);
+  }
+
+  /* ---------- Camera lifecycle ---------- */
+  async function startCamera() {
+    if (typeof Pose === 'undefined') { setStatus('The AI model could not load. Check your internet connection and reload the page.'); return; }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setStatus('Camera access needs a secure page. Open this site over https:// (or localhost).'); return;
+    }
+    el.startBtn.disabled = true; setStatus('Starting camera…');
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 960 }, height: { ideal: 540 }, facingMode: 'user' }, audio: false });
+      video.srcObject = stream; await video.play();
+    } catch (e) {
+      el.startBtn.disabled = false;
+      setStatus(e && e.name === 'NotAllowedError' ? 'Camera permission was blocked. Allow camera access in your browser and try again.'
+        : e && e.name === 'NotFoundError' ? 'No camera found on this device.'
+        : 'Could not start the camera: ' + (e && e.message ? e.message : e));
+      return;
+    }
+    try {
+      setStatus('Loading AI model (first time takes a few seconds)…');
+      if (!pose) {
+        pose = new Pose({ locateFile: f => MP_URL + f });
+        pose.setOptions({
+          modelComplexity: (navigator.hardwareConcurrency || 4) <= 4 ? 0 : 1,  // lighter model on low-end devices
+          smoothLandmarks: true, enableSegmentation: false,
+          minDetectionConfidence: 0.5, minTrackingConfidence: 0.5
+        });
+        pose.onResults(onResults);
+        await pose.initialize();
+      }
+    } catch (e) {
+      stopStream(); el.startBtn.disabled = false;
+      setStatus('The AI model failed to load. Check your connection and try again.'); return;
+    }
+    try { audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)(); audioCtx.resume(); } catch (e) {}
+
+    // fresh session
+    sets = []; cur = { reps: 0, clean: 0 }; totalReps = 0; cleanReps = 0; partials = 0;
+    repTimes = []; activeMs = 0; lastRepAt = performance.now(); latencyAvg = 0;
+    resetRepState(); applyExercise();
+    running = true;
+    el.overlay.classList.add('hidden');
+    el.setBtn.disabled = false; el.endBtn.disabled = false; el.startBtn.disabled = false;
+    setStatus('Tracking. Do your first rep.');
+    feedback(EXERCISES[exKey].ready, 'good', true);
+    renderHud();
+
+    tickId = setInterval(() => {
+      activeMs += 1000;
+      if (cur.reps > 0 && performance.now() - lastRepAt > 25000) finishSet();   // auto-group sets after a rest
+    }, 1000);
+    rafId = requestAnimationFrame(loop);
+  }
+
+  function stopStream() {
+    if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+    video.srcObject = null;
+  }
+
+  el.startBtn.addEventListener('click', startCamera);
+
+  /* ---------- End workout, summary and storage ---------- */
+  const KEY = 'fitform_history_v1';
+  const loadHistory = () => { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) { return []; } };
+  const saveHistory = h => { try { localStorage.setItem(KEY, JSON.stringify(h.slice(-100))); } catch (e) {} };
+
+  el.endBtn.addEventListener('click', () => {
+    finishSet();
+    running = false; cancelAnimationFrame(rafId); clearInterval(tickId); stopStream();
+    window.speechSynthesis && window.speechSynthesis.cancel();
+    el.overlay.classList.remove('hidden'); el.fb.classList.remove('show');
+    el.setBtn.disabled = true; el.endBtn.disabled = true;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    setStatus('');
+
+    if (totalReps === 0) { renderHud(); setStatus('Workout ended. No reps were counted, so nothing was saved.'); return; }
+
+    const ex = EXERCISES[exKey];
+    const attempts = totalReps + partials;
+    const acc = attempts ? Math.round(cleanReps / attempts * 1000) / 10 : 0;
+    const kcal = Math.round(totalReps * ex.kcal + activeMs / 60000 * 1.5);
+    const rec = { date: new Date().toISOString(), exercise: ex.name, reps: totalReps, sets: sets.length, accuracy: acc, activeMs, kcal };
+    const h = loadHistory(); h.push(rec); saveHistory(h);
+
+    $('sumEx').textContent = ex.name + ' · ' + sets.length + (sets.length === 1 ? ' set' : ' sets');
+    $('sumReps').textContent = totalReps;
+    $('sumAcc').textContent = acc + '%';
+    $('sumTime').textContent = fmtTime(activeMs);
+    $('sumKcal').textContent = kcal + ' kcal';
+    const dlg = $('summary');
+    if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
+    renderProgress();
+    renderHud();
+  });
+  $('closeSummary').addEventListener('click', () => { const d = $('summary'); d.close ? d.close() : d.removeAttribute('open'); });
+
+  /* ---------- Progress section ---------- */
+  function dayKey(d) { return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
+  function renderProgress() {
+    const h = loadHistory();
+    $('totalWorkouts').textContent = h.length;
+    $('totalReps').textContent = h.reduce((s, r) => s + r.reps, 0);
+    $('bestAcc').textContent = h.length ? Math.max(...h.map(r => r.accuracy)) + '%' : '–';
+
+    // streak of consecutive days, counting from today (or yesterday if you haven't trained yet today)
+    const days = new Set(h.map(r => dayKey(new Date(r.date))));
+    let streak = 0, d = new Date();
+    if (!days.has(dayKey(d))) d.setDate(d.getDate() - 1);
+    while (days.has(dayKey(d))) { streak++; d.setDate(d.getDate() - 1); }
+    $('streak').textContent = streak;
+
+    const box = $('history');
+    if (!h.length) { box.innerHTML = '<p class="empty">No workouts yet. Finish one in the live tracker and it will show up here.</p>'; return; }
+    const rows = h.slice(-6).reverse().map(r => {
+      const dt = new Date(r.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+      return '<tr><td>' + dt + '</td><td>' + r.exercise + '</td><td>' + r.reps + ' reps (' + r.sets + (r.sets === 1 ? ' set' : ' sets') + ')</td><td>' + r.accuracy + '%</td><td>' + fmtTime(r.activeMs) + '</td></tr>';
+    }).join('');
+    box.innerHTML = '<table><thead><tr><th>Date</th><th>Exercise</th><th>Volume</th><th>Accuracy</th><th>Time</th></tr></thead><tbody>' + rows + '</tbody></table>';
+  }
+
+  /* ---------- Init ---------- */
+  applyExercise(); renderHud(); renderProgress();
+  window.addEventListener('pagehide', stopStream);
+})();
+</script>
+</body>
+</html>
